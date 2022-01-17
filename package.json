@@ -1,0 +1,39 @@
+{
+  "name": "@factiva/core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/factiva/index.js",
+  "scripts": {
+    "start": "node src/factiva/index.js",
+    "test": "mocha",
+    "babel": "./node_modules/.bin/babel src --out-dir lib",
+    "lint": "eslint src/**",
+    "lint-fix": "eslint --fix --ext .js,.jsx ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/pubsub": "^2.13.0",
+    "axios": "^0.21.1",
+    "chai-as-promised": "^7.1.1",
+    "config": "^3.3.6",
+    "dataframe-js": "^1.4.4",
+    "http-errors": "^1.6.3",
+    "restify": "^8.5.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.14.5",
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.5",
+    "chai": "^4.3.4",
+    "eslint": "^7.28.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "jsdoc": "^3.6.7",
+    "mocha": "^8.3.2",
+    "prettier": "^2.3.1"
+  }
+}
