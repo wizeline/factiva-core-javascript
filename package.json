@@ -8,19 +8,20 @@
     "test": "mocha",
     "babel": "./node_modules/.bin/babel src --out-dir lib",
     "lint": "eslint src/**",
-    "lint-fix": "eslint --fix --ext .js,.jsx ."
+    "lint-fix": "eslint --fix --ext .js,.jsx .",
+    "test-debug": "npm run babel && npm run test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/pubsub": "^2.13.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "chai-as-promised": "^7.1.1",
     "config": "^3.3.6",
     "dataframe-js": "^1.4.4",
     "http-errors": "^1.6.3",
-    "restify": "^8.5.1"
+    "restify": "^8.6.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.5",
