@@ -1,3 +1,4 @@
+/* eslint-disable object-curly-newline */
 import axios from 'axios';
 import config from 'config';
 import createError from 'http-errors';
@@ -86,7 +87,18 @@ const handleError = (err) => {
   );
 };
 
-// eslint-disable-next-line
+const getProxyConfiguration = () => {
+  let options = null;
+  const { use, protocol, host, port, auth } = loadEnvVariable('proxy');
+  if (use) {
+    options = { protocol, host, port };
+    if (auth.username !== '' && auth.password !== '') {
+      options = { ...options, auth };
+    }
+  }
+  return options;
+};
+
 const sendRequest = async ({ method, url, payload, headers, params }) => {
   if (method === 'GET' && params && typeof params !== 'object') {
     throw ReferenceError('Unexpected qsParams value');
@@ -102,6 +114,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
       throw Error('Unexpected payload value');
     }
   }
+  const proxy = getProxyConfiguration();
 
   const request = {
     method,
@@ -109,6 +122,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
     ...(params ? { params } : null),
     ...(data ? { data } : null),
     ...(headers ? { headers } : {}),
+    ...(proxy ? { proxy } : {}),
   };
 
   try {
@@ -117,6 +131,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
     return response;
   } catch (err) {
     handleError(err);
+    return err;
   }
 };
 
@@ -159,4 +174,5 @@ module.exports = {
   loadGenericEnvVariable,
   validateType,
   maskWord,
+  getProxyConfiguration,
 };

@@ -32,7 +32,7 @@ class UserKey {
    * @return {TypeError} when the key len isn't valid
    */
   setApiKey(key) {
-    const loadedKey = key || helper.loadEnvVariable('UserKey');
+    const loadedKey = key || helper.loadEnvVariable('userKey');
     this.validateKey(loadedKey);
     this.key = loadedKey;
   }
