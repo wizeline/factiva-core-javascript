@@ -1,3 +1,13 @@
 {
-  "UserKey": "default"
+  "userKey": "default",
+  "proxy": {
+    "use": false,
+    "protocol": "https",
+    "host": "localhost",
+    "port": "80",
+    "auth": {
+      "username": "",
+      "password": ""
+    }
+  }
 }

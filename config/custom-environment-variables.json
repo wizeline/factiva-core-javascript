@@ -1,3 +1,13 @@
 {
-  "UserKey": "USER_KEY"
+  "userKey": "USER_KEY",
+  "proxy": {
+    "use": "PROXY_USE",
+    "protocol": "PROXY_PROTOCOL",
+    "host": "PROXY_HOST",
+    "port": "PROXY_PORT",
+    "auth": {
+      "username": "PROXY_AUTH_USER",
+      "password": "PROXY_AUTH_PASSWORD"
+    }
+  }
 }
