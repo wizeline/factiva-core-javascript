@@ -8,46 +8,96 @@ Javascript package with root definitions and dictionaries, to support other func
 
 ## Installation
 
-- Be sure to have installed node 13
-- Install all dependencies from the root -> `npm install`
-- Run `npm run babel` for using the transpile version
-- Example of importing a module 
+* Be sure to have installed node 13
+* Install all dependencies from the root -> `npm install`
+* Run `npm run babel` for using the transpile version
+* Example of importing a module
+
   ```js
     const { UserKey } = require('./lib/factiva/core');
     const { StreamUser } = require('./lib/factiva/core');
   ```
 
 ## Usage
+
   Example of UserKey
+
   ```js
     const apiKey = 'aaabbccccdeded';
     const requestInfo = false;
-    UserKey
-      .create(apiKey, requestInfo)
+
+    // Using promise
+    UserKey.create(apiKey, requestInfo)
       .then((user) => console.log(user));
+
+    // Using async/await
+    const user = await UserKey.create(apiKey, requestInfo);
+
   ```
- 
+
   Example of Dicts
+
   ```js  
     const industriesHierarchyCodes = dicts.industriesHierarchy();
     console.log(industriesHierarchyCodes.show());
   ```
   
   Example of StreamUser
+
   ```js
     const apiKey = 'aaabbccccdeded';
     const streamUser = new StreamUser(apiKey);
-    streamUser
-      .getStreams()
+    
+    // Using promise
+    streamUser.getStreams()
       .then((streams) => console.log(streams));
+    
+    // Using async/await
+    const streams = await streamUser.getStreams();
+
+  ```
+
+## Environment vars
+
+### Required
+
+  ```bash
+    USER_KEY=loremipsum12345
+  ```
+
+### Optionals
+
+  ```bash
+    PROXY_USE=false
+    PROXY_PROTOCOL=https
+    PROXY_HOST=localhost
+    PROXY_PORT=80
+
+    # If auth is required
+    PROXY_AUTH_USER=user
+    PROXY_AUTH_PASSWORD=pass
+  ```
+
+## Build lib
+
+Run the command in cli
+
+  ```bash
+    npm run babel
   ```
 
 ## Tests
 
-Export the user key variable
-  
-    export USER_KEY=<TEST_KEY>
+Run the command in cli
 
-Run the command in cli 
-  
+  ```bash
     npm run test
+  ```
+
+## Build and run test
+
+Run the command in cli
+
+  ```bash
+    npm run test-debug
+  ```

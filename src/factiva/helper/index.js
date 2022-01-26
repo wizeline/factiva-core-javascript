@@ -1,3 +1,4 @@
+/* eslint-disable object-curly-newline */
 import axios from 'axios';
 import config from 'config';
 import createError from 'http-errors';
@@ -52,15 +53,17 @@ const validateType = (varToValidate, expectedType, errorMessage) => {
   return SyntaxError('Type not identified');
 };
 
-const maskWord = (word) => {
+const maskWord = (word, rightPadding = 4) => {
   /* Masks a string word */
 
   if (word.length <= 4) {
     return word;
   }
-  const masked = word.substring(0, word.length - 4).replace(/[a-z\d]/gi, '#');
-  word.substring(word.length - 4, word.length);
-  return masked;
+  const masked = word
+    .substring(0, word.length - rightPadding)
+    .replace(/[a-z\d]/gi, '#');
+  const unmasked = word.substring(word.length - rightPadding, word.length);
+  return masked + unmasked;
 };
 
 const handleError = (err) => {
@@ -84,7 +87,18 @@ const handleError = (err) => {
   );
 };
 
-// eslint-disable-next-line
+const getProxyConfiguration = () => {
+  let options = null;
+  const { use, protocol, host, port, auth } = loadEnvVariable('proxy');
+  if (use) {
+    options = { protocol, host, port };
+    if (auth.username !== '' && auth.password !== '') {
+      options = { ...options, auth };
+    }
+  }
+  return options;
+};
+
 const sendRequest = async ({ method, url, payload, headers, params }) => {
   if (method === 'GET' && params && typeof params !== 'object') {
     throw ReferenceError('Unexpected qsParams value');
@@ -100,6 +114,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
       throw Error('Unexpected payload value');
     }
   }
+  const proxy = getProxyConfiguration();
 
   const request = {
     method,
@@ -107,6 +122,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
     ...(params ? { params } : null),
     ...(data ? { data } : null),
     ...(headers ? { headers } : {}),
+    ...(proxy ? { proxy } : {}),
   };
 
   try {
@@ -115,6 +131,7 @@ const sendRequest = async ({ method, url, payload, headers, params }) => {
     return response;
   } catch (err) {
     handleError(err);
+    return err;
   }
 };
 
@@ -157,4 +174,5 @@ module.exports = {
   loadGenericEnvVariable,
   validateType,
   maskWord,
+  getProxyConfiguration,
 };

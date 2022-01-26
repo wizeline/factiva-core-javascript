@@ -1,14 +1,16 @@
 import { PubSub } from '@google-cloud/pubsub';
-
-import UserKey from './UserKey';
-import StreamResponse from './StreamReponse';
-import constants from './constants';
 import helper from '../helper';
+import { UserKey } from './auth';
+import constants from './constants';
+import StreamResponse from './StreamReponse';
+
+const DEFAULT_HOST_DNA = `${constants.API_HOST}${constants.DEFAULT_HOST_DNA}`;
+const DEFAULT_HOST_ALPHA = `${constants.API_HOST}${constants.DNA_BASEPATH}`;
 
 class StreamUser extends UserKey {
   // eslint-disable-next-line no-useless-constructor
-  constructor(apiKey, requestInfo) {
-    super(apiKey, requestInfo);
+  constructor(key, requestInfo) {
+    super(key, requestInfo);
   }
 
   /**
@@ -64,7 +66,7 @@ class StreamUser extends UserKey {
    */
   async fetchCredentials() {
     const headers = this.getAuthenticationHeaders();
-    const uri = StreamUser.getUriContext();
+    const uri = StreamUser.getUriContext(headers);
     const response = await helper.apiSendRequest({
       method: 'GET',
       endpointUrl: `${uri}${constants.API_ACCOUNT_STREAM_CREDENTIALS_BASEPATH}`,
@@ -88,8 +90,20 @@ class StreamUser extends UserKey {
    * this.getUriContext();
    * @returns {string} Returns the uri in string format which can be used for
    */
-  static getUriContext() {
-    return `${constants.API_HOST}${constants.ALPHA_BASEPATH}`;
+  static getUriContext(headers) {
+    if ('Authorization' in headers) {
+      return DEFAULT_HOST_DNA;
+    }
+
+    if ('user-key' in headers) {
+      return DEFAULT_HOST_ALPHA;
+    }
+
+    const msg = `Could not determine user credentials:
+    Must specify account credentials as key
+    through env vars`;
+
+    throw ReferenceError(msg);
   }
 
   /**
@@ -101,8 +115,8 @@ class StreamUser extends UserKey {
    * @returns {ReferenceError} if the credentials are not found
    */
   getAuthenticationHeaders() {
-    if (this.apiKey) {
-      return { 'user-key': this.apiKey };
+    if (this.key) {
+      return { 'user-key': this.key };
     }
 
     const msg = `Could not find credentials:
