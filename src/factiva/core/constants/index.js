@@ -8,6 +8,7 @@ import dowjones from './dowjones';
 import errors from './errors';
 import snapshots from './snapshots';
 import streams from './streams';
+import request from './request';
 
 /** Constants used on the project */
 module.exports = {
@@ -17,4 +18,5 @@ module.exports = {
   ...errors,
   ...snapshots,
   ...streams,
+  ...request,
 };

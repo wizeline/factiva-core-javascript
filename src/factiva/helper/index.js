@@ -4,7 +4,9 @@
 
 import axios from 'axios';
 import config from 'config';
+import { createWriteStream } from 'fs';
 import createError from 'http-errors';
+import { REQUEST_DEFAULT_TYPE, REQUEST_STREAM_TYPE } from '../core/constants';
 
 /**
  * Object to be used by axios if proxy request is need
@@ -15,6 +17,8 @@ import createError from 'http-errors';
  * @property {string|object} [payload] - Payload request
  * @property {string} [headers] - Headers to be set
  * @property {string} [qsParams] - Params request
+ * @property {string} [responseType=json] - Specify the type of response expected. Use 'stream' for big files
+ * @property {string} [fileName=./tmp.csv] - Specify file name if responseType is stream
  */
 
 /**
@@ -146,13 +150,24 @@ const handleError = (err) => {
  */
 const getProxyConfiguration = () => {
   let options = null;
-  const { use, protocol, host, port, auth } = loadEnvVariable('proxy');
-  if (use) {
-    options = { protocol, host, port };
-    if (auth.username !== '' && auth.password !== '') {
-      options = { ...options, auth };
+  try {
+    const {
+      use = false,
+      protocol = '',
+      host = '',
+      port = '',
+      auth = {},
+    } = loadEnvVariable('proxy');
+    if (use) {
+      options = { protocol, host, port };
+      if (
+        Object.keys(auth).includes('username') &&
+        Object.keys(auth).includes('password')
+      ) {
+        options = { ...options, auth };
+      }
     }
-  }
+  } catch (e) {}
   return options;
 };
 
@@ -167,6 +182,8 @@ const sendRequest = async ({
   payload,
   headers,
   qsParams,
+  responseType = REQUEST_DEFAULT_TYPE,
+  fileName = './tmp.csv',
 }) => {
   if (method === 'GET' && qsParams && typeof qsParams !== 'object') {
     throw ReferenceError('Unexpected qsParams value');
@@ -192,12 +209,27 @@ const sendRequest = async ({
     ...(data ? { data } : null),
     ...(headers ? { headers } : {}),
     ...(proxy ? { proxy } : {}),
+    responseType,
   };
 
   try {
-    const response = await axios(request);
+    if (responseType === REQUEST_STREAM_TYPE) {
+      const writer = createWriteStream(fileName);
+      const response = await axios(request);
+      response.data.pipe(writer);
+      return new Promise((resolve, reject) => {
+        response.data.on('end', () => {
+          resolve();
+        });
 
-    return response;
+        response.data.on('error', () => {
+          reject();
+        });
+      });
+    } else {
+      const response = await axios(request);
+      return response;
+    }
   } catch (err) {
     handleError(err);
     return err;
@@ -216,6 +248,8 @@ const apiSendRequest = async ({
   headers = null,
   qsParams = null,
   payload = null,
+  responseType = REQUEST_DEFAULT_TYPE,
+  fileName = null,
 }) => {
   if (!headers) {
     throw ReferenceError('Headers for Factiva requests cannot be empty');
@@ -232,10 +266,12 @@ const apiSendRequest = async ({
 
   const response = await sendRequest({
     method: methUpper,
-    url: endpointUrl,
+    endpointUrl,
     headers,
     params: qsParams,
     payload,
+    responseType,
+    fileName,
   });
 
   return response;
