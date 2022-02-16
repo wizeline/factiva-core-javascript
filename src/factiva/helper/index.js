@@ -4,9 +4,14 @@
 
 import axios from 'axios';
 import config from 'config';
-import { createWriteStream } from 'fs';
+import { existsSync, mkdirSync, createWriteStream } from 'fs';
+
 import createError from 'http-errors';
-import { REQUEST_DEFAULT_TYPE, REQUEST_STREAM_TYPE } from '../core/constants';
+import {
+  REQUEST_DEFAULT_TYPE,
+  REQUEST_STREAM_TYPE,
+  API_EXTRACTION_FILE_FORMATS,
+} from '../core/constants';
 
 /**
  * Object to be used by axios if proxy request is need
@@ -293,6 +298,45 @@ const apiSendRequest = async ({
   return response;
 };
 
+/**
+ *
+ * @param {string} fileUrl - URL of the file to be downloaded.
+ * @param {string} headers - Auth headers
+ * @param {string} fileName - Name to be used as local filename
+ * @param {string} fileExtension - Extension of the file
+ * @param {string} toSavePath - Path to be used to store the file
+ * @param {boolean} [addTimestamp=false] - Flag to determine if include timestamp info at the filename
+ * @returns {string} -  Dowloaded file path
+ */
+const downloadFile = async (
+  fileUrl,
+  headers,
+  fileName,
+  fileExtension,
+  toSavePath,
+  addTimestamp = false,
+) => {
+  validateOption(fileExtension, API_EXTRACTION_FILE_FORMATS);
+  if (!existsSync(toSavePath)) {
+    mkdirSync(toSavePath);
+  }
+  if (addTimestamp) {
+    const timeStamp = new Date().toISOString();
+    fileName = `${fileName}-${timeStamp}`;
+  }
+  const localFileName = `${toSavePath}/${fileName}.${fileExtension}`;
+
+  await sendRequest({
+    method: 'GET',
+    endpointUrl: fileUrl,
+    headers,
+    responseType: REQUEST_STREAM_TYPE,
+    fileName: localFileName,
+  });
+
+  return localFileName;
+};
+
 /** Include common and helper functions */
 module.exports = {
   loadEnvVariable,
@@ -302,4 +346,5 @@ module.exports = {
   maskWord,
   getProxyConfiguration,
   validateOption,
+  downloadFile,
 };
