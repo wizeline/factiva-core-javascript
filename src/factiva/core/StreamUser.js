@@ -8,8 +8,8 @@ import { UserKey } from './auth';
 import constants from './constants';
 import StreamResponse from './StreamReponse';
 
-const DEFAULT_HOST_DNA = `${constants.API_HOST}${constants.DEFAULT_HOST_DNA}`;
-const DEFAULT_HOST_ALPHA = `${constants.API_HOST}${constants.DNA_BASEPATH}`;
+const DEFAULT_HOST_DNA = `${constants.API_HOST}${constants.DNA_BASEPATH}`;
+const DEFAULT_HOST_ALPHA = `${constants.API_HOST}${constants.ALPHA_BASEPATH}`;
 
 /**
  * Class used to get stream info related by a user
