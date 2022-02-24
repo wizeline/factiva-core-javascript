@@ -2,7 +2,7 @@
  *  @module factiva/core/StreamUser
  */
 
-import { PubSub } from '@google-cloud/pubsub';
+import { PubSub, v1 } from '@google-cloud/pubsub';
 import helper from '../helper';
 import { UserKey } from './auth';
 import constants from './constants';
@@ -47,7 +47,7 @@ class StreamUser extends UserKey {
   async getClientSubscription() {
     const credentials = await this.fetchCredentials();
     try {
-      const pubsubClient = new PubSub({
+      const pubsubClient = new v1.SubscriberClient({
         projectId: credentials.project_id,
         credentials,
       });

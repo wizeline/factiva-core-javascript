@@ -11,6 +11,9 @@ import {
   REQUEST_DEFAULT_TYPE,
   REQUEST_STREAM_TYPE,
   API_EXTRACTION_FILE_FORMATS,
+  TIMESTAMP_FIELDS,
+  MULTIVALUE_FIELDS_SPACE,
+  MULTIVALUE_FIELDS_COMMA,
 } from '../core/constants';
 
 /**
@@ -317,14 +320,12 @@ const downloadFile = async (
   addTimestamp = false,
 ) => {
   validateOption(fileExtension, API_EXTRACTION_FILE_FORMATS);
-  if (!existsSync(toSavePath)) {
-    mkdirSync(toSavePath);
-  }
+  createPathIfNotExist(toSavePath);
   if (addTimestamp) {
     const timeStamp = new Date().toISOString();
     fileName = `${fileName}-${timeStamp}`;
   }
-  const localFileName = `${toSavePath}/${fileName}.${fileExtension}`;
+  const localFileName = join(toSavePath, `${fileName}.${fileExtension}`);
 
   await sendRequest({
     method: 'GET',
@@ -337,6 +338,64 @@ const downloadFile = async (
   return localFileName;
 };
 
+const getCurrentDate = () => {
+  const date = new Date();
+  const currentMonth = date.getMonth() + 1;
+  const month = currentMonth < 10 ? `0${currentMonth}` : currentMonth;
+  return `${date.getFullYear()}${month}${date.getDate()}`;
+};
+const isotsToMsts = (isodate) => {
+  const date = new Date(isodate);
+  return date.getTime() / 1000;
+};
+
+const formatTimestamps = (message) => {
+  TIMESTAMP_FIELDS.forEach((timeName) => {
+    if (Object.keys(message).includes(timeName)) {
+      message[timeName] = isotsToMsts(message[timeName]);
+    }
+    message['delivery_datetime'] = Date.now()/1000;
+  });
+  return message;
+};
+
+const multivalueToList = (fieldValue = null, sep = ',') => {
+  let retVal = [];
+  if (!fieldValue || fieldValue === '') {
+    retVal = [];
+  } else {
+    const allVals = fieldValue.split(sep);
+    allVals.forEach((value) => {
+      if (value !== '') {
+        retVal.push(value);
+      }
+    });
+  }
+  return retVal;
+};
+
+const formatMultivalues = (message) => {
+  MULTIVALUE_FIELDS_SPACE.forEach((fieldSpace) => {
+    if (Object.keys(message).includes(fieldSpace)) {
+      message[fieldSpace] = multivalueToList(message[fieldSpace], ' ');
+    }
+  });
+  MULTIVALUE_FIELDS_COMMA.forEach((fieldComma) => {
+    if (Object.keys(message).includes(fieldComma)) {
+      message[fieldComma] = multivalueToList(message[fieldComma]);
+    }
+  });
+  return message;
+};
+
+const createPathIfNotExist = (path) => {
+  if (!existsSync(path)) {
+    mkdirSync(path);
+  }
+};
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 /** Include common and helper functions */
 module.exports = {
   loadEnvVariable,
@@ -347,4 +406,9 @@ module.exports = {
   getProxyConfiguration,
   validateOption,
   downloadFile,
+  formatTimestamps,
+  formatMultivalues,
+  createPathIfNotExist,
+  getCurrentDate,
+  sleep,
 };
