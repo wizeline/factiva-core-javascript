@@ -1,11 +1,18 @@
-/* Define library's constant literals. */
+/**
+ *  @module factiva/core/constants
+ */
+
 import analytics from './analytics';
 import apistates from './apistates';
 import dowjones from './dowjones';
 import errors from './errors';
 import snapshots from './snapshots';
 import streams from './streams';
+import request from './request';
+import listener from './listener';
+import logger from './logger';
 
+/** Constants used on the project */
 module.exports = {
   ...analytics,
   ...apistates,
@@ -13,4 +20,7 @@ module.exports = {
   ...errors,
   ...snapshots,
   ...streams,
+  ...request,
+  ...listener,
+  ...logger,
 };
